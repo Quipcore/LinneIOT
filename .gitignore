@@ -3,3 +3,4 @@
 /venv
 /armcc
 .idea
+.pymakr.conf
