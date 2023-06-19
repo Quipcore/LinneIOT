@@ -1,0 +1,5 @@
+/sdk
+/mingw
+/venv
+/armcc
+.idea
