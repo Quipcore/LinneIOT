@@ -56,7 +56,6 @@ class DHT11:
     @property
     def temperature(self):
         self.measure()
-        print("HHHHHHHHHH")
         return self._temperature
 
     def _send_init_signal(self):
