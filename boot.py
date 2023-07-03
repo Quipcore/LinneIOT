@@ -7,14 +7,14 @@ import dht11 as dht
 from machine import Pin, reset, ADC
 
 #ubidots api
-API_KEY ="BBFF-34747d2a506900eadbd08b595c17b63d422"
-TOKEN = "BBFF-PV8MTDyv4z5lLYHLOZBM6vYt4XucqG" #Put here your TOKEN
+API_KEY =""
+TOKEN = "" #Put here your TOKEN
 DEVICE_LABEL = "picowboard" # Assign the device label desire to be send
 VARIABLE_LABEL = "sensor"  # Assign the variable label desire to be send
 TEMP_LABEL = "temp"
 HUMIDITY_LABEL = "humidity"
-WIFI_SSID = "lido" # Assign your the SSID of your network
-WIFI_PASS = "Theyokertma" # Assign your the password of your network
+WIFI_SSID = "" # Assign your the SSID of your network
+WIFI_PASS = "" # Assign your the password of your network
 DELAY = 5  # Delay in seconds
 LED_PIN = Pin("LED", Pin.OUT)
 
