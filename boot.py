@@ -1,99 +1,113 @@
-# boot.py -- run on boot-up
 import network
-import socket
-from time import sleep
-from picozero import pico_temp_sensor, pico_led
-from machine import Pin, reset, ADC
+import urequests as requests
+import machine
+from time import sleep_ms, sleep
+import random
 import dht11 as dht
+from machine import Pin, reset, ADC
 
-ssid = 'lido'
-password = 'Theyokertma'
+#ubidots api
+API_KEY ="BBFF-34747d2a506900eadbd08b595c17b63d422"
+TOKEN = "BBFF-PV8MTDyv4z5lLYHLOZBM6vYt4XucqG" #Put here your TOKEN
+DEVICE_LABEL = "picowboard" # Assign the device label desire to be send
+VARIABLE_LABEL = "sensor"  # Assign the variable label desire to be send
+TEMP_LABEL = "temp"
+HUMIDITY_LABEL = "humidity"
+WIFI_SSID = "lido" # Assign your the SSID of your network
+WIFI_PASS = "Theyokertma" # Assign your the password of your network
+DELAY = 5  # Delay in seconds
+LED_PIN = Pin("LED", Pin.OUT)
 
 
+# Builds the json to send the request
+def build_json(temp_value, humidity_value):
+    try:
+        data = {TEMP_LABEL: {"value": temp_value}, HUMIDITY_LABEL: {"value": humidity_value}}
+        return data
+    except:
+        return None
+
+# Random number generator
+def random_integer(upper_bound):
+    return random.getrandbits(32) % upper_bound
+
+# Sending data to Ubidots Restful Webserice
+def sendData(device, temp_value, humidity_value):
+    try:
+        url = "https://industrial.api.ubidots.com/"
+        url = url + "api/v1.6/devices/" + device
+        headers = {"X-Auth-Token": TOKEN, "Content-Type": "application/json"}
+        data = build_json(temp_value, humidity_value)
+        if data is not None:
+            print(data)
+            req = requests.post(url=url, headers=headers, json=data)
+            return req.json()
+        else:
+           pass
+    except:
+        pass
+    
 def connect():
-    #Connect to WLAN
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(ssid, password)
-    while wlan.isconnected() == False:
-        print('Waiting for connection...')
-        sleep(1)
+    wlan = network.WLAN(network.STA_IF)         # Put modem on Station mode
+    if not wlan.isconnected():                  # Check if already connected
+        print('connecting to network...')
+        wlan.active(True)                       # Activate network interface
+        # set power mode to get WiFi power-saving off (if needed)
+        wlan.config(pm = 0xa11140)
+        wlan.connect(WIFI_SSID, WIFI_PASS)  # Your WiFi Credential
+        print('Waiting for connection...', end='')
+        # Check if it is connected otherwise wait
+        while not wlan.isconnected() and wlan.status() >= 0:
+            print('.', end='')
+            sleep(1)
+    # Print the IP assigned by router
     ip = wlan.ifconfig()[0]
-    print(f'Connected on {ip}')
+    print('\nConnected on {}'.format(ip))
     return ip
 
+def warning_LED(amount):
+    for i in range(amount):   
+        LED_PIN.on()
+        sleep_ms(500)
+        LED_PIN.off()
+        sleep_ms(500)
 
-def open_socket(ip):
-    # Open a socket
-    port = 80
-    address = (ip, port)
-    connection = socket.socket()
-    connection.bind(address)
-    connection.listen(1)
-    print(f'Port: {port}, Connection: {connection}')
-    return connection
+def boot_lights():
+    warning_LED(10)
 
-def webpage(temperature, state, sensor_temperature):
-    #Template HTML
-    html = f"""
-            <!DOCTYPE html>
-            <html>
-            <form action="./lighton">
-            <input type="submit" value="Light on" />
-            </form>
-            <form action="./lightoff">
-            <input type="submit" value="Light off" />
-            </form action="./temp">
-            <input type="submit" value="Get sensor temp" />
-            </form>
-            <p>LED is {state}</p>
-            <p>Board temperature is {temperature}</p>
-            <p>Sensor temperture is {sensor_temperature}</p>
-            </body>
-            </html>
-            """
-    return str(html)
-
-def read_temp(temperature_sensor):
-    return temperature_sensor.temperature()
-
-    
-def serve(connection):
-    #Start a web server
-    state = 'OFF'
-    pico_led.off()
-    board_temp = 0
-    sensor_temp = 0.0
-    temp_sensor = dht.DHT11(Pin(27)) 
-
-    while True:
-        client = connection.accept()[0]
-        request = client.recv(1024)
-        request = str(request)
+#boot_lights()
+def main():
+    connect()
+    bad_value = -10000
+    run = True
+    while run:
+        LED_PIN.on()
+        dht11_sensor = dht.DHT11(Pin(27))
+        temp = bad_value
+        humidity = bad_value
         try:
-            request = request.split()[1]
-        except IndexError:
+            temp = dht11_sensor.temperature
+            humidity = dht11_sensor.humidity
+        except:
             pass
-        if request == '/lighton?':
-            pico_led.on()
-            state = 'ON'
-        elif request =='/lightoff?':
-            pico_led.off()
-            state = 'OFF'
-        board_temp = pico_temp_sensor.temp
-
-        sensor_temp = temp_sensor.temperature
-
-        html = webpage(board_temp, state, sensor_temp)
-        print(html)
-        client.send(html)
-        client.close()
-
-try:
-    print("\nBooting\n\n")
-    ip = connect()
-    connection = open_socket(ip)
-    serve(connection)
-    
-except KeyboardInterrupt:
-    reset()
+        
+        if temp != bad_value and humidity != bad_value:
+            returnValue = sendData(DEVICE_LABEL, temp, humidity)
+        else:
+            print("Failed to get signal")
+            LED_PIN.off()
+            
+        run = check_status_pin()
+        sleep_ms(DELAY*1000)
+        
+def check_status_pin():
+    status_pin = Pin(15, Pin.IN, Pin.PULL_DOWN)
+    print(status_pin.value())
+    return status_pin.value() != 1
+      
+run_program = check_status_pin()  
+while run_program:  
+    main()
+    run_program = check_status_pin()
+warning_LED(10)
+LED_PIN.off()
