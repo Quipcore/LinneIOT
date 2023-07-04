@@ -202,3 +202,6 @@ In the ubidots the are two labels "temp" and "humidity" connected to the pico de
 
 The ubidots api can handle 5 requests/sec but mostly due the fact at the scale above you can't see 5 data points every second the pico is set to send once every 5 second, but if it fails to do so for some reason it won't really matter if it takes 10-15 seconds between requests going it's still going to have the right shape in the visualization. 
 ## Finalizing the design
+In conclusion, while there isn't nearly enough data to say anything defintive this project have been both frustrating and fun to work on at the same time.
+Next step would be to  do something with the data collected, such as sending reminders to maybe shut down what whatever device is causing the temperature spike when a certain level is reached.
+Despite not being finished to the level I wanted, I'm still enterly ok with my first go at both IoT and python
