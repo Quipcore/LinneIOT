@@ -6,7 +6,7 @@ The objective of this project is to measure temperature and humitdity from a sen
 **Time**: around one hour
 
 ## Objective  
-#### <font color="red"> **NEEDS REWRITE**  </font>
+<font color="red"> **NEEDS REWRITE**  </font>
 
 I had been sleeping poorly due to the swedish summer heat. To combat this I created a small IOT project to track the temperature in my bedroom. The plan was to use this data and see when and why the bedroom got to its warmest point, was it due to computer devices emitting a lot of heat or the general temperature outside? Being a student meaning that I didn't have the biggest disposable icome to fix say my PCs heating issue I investigated to see if it was something else cheaper that needed a fix first. While project didn't include data from my PC it really should have so I wouldn't have to guess at the cause
 
