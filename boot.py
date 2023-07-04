@@ -1,6 +1,5 @@
 import network
 import urequests as requests
-import machine
 from time import sleep_ms, sleep
 import dht11 as dht
 from machine import Pin
