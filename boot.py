@@ -2,17 +2,14 @@ import network
 import urequests as requests
 import machine
 from time import sleep_ms, sleep
-import random
 import dht11 as dht
-from machine import Pin, reset, ADC
+from machine import Pin
 
-#ubidots api
-API_KEY =""
-TOKEN = "" #Put here your TOKEN
+
+TOKEN = "" #Put your TOKEN here
 DEVICE_LABEL = "picowboard" # Assign the device label desire to be send
-VARIABLE_LABEL = "sensor"  # Assign the variable label desire to be send
-TEMP_LABEL = "temp"
-HUMIDITY_LABEL = "humidity"
+TEMP_LABEL = "temp" # Assign the temperature label desire to be send
+HUMIDITY_LABEL = "humidity" # Assign the humidity label desire to be send
 WIFI_SSID = "" # Assign your the SSID of your network
 WIFI_PASS = "" # Assign your the password of your network
 DELAY = 5  # Delay in seconds
@@ -26,10 +23,6 @@ def build_json(temp_value, humidity_value):
         return data
     except:
         return None
-
-# Random number generator
-def random_integer(upper_bound):
-    return random.getrandbits(32) % upper_bound
 
 # Sending data to Ubidots Restful Webserice
 def sendData(device, temp_value, humidity_value):
@@ -46,7 +39,8 @@ def sendData(device, temp_value, humidity_value):
            pass
     except:
         pass
-    
+
+#Connect to WIFI
 def connect():
     wlan = network.WLAN(network.STA_IF)         # Put modem on Station mode
     if not wlan.isconnected():                  # Check if already connected
@@ -65,6 +59,7 @@ def connect():
     print('\nConnected on {}'.format(ip))
     return ip
 
+#Toggle the LED pin n amount times
 def warning_LED(amount):
     for i in range(amount):   
         LED_PIN.on()
@@ -72,15 +67,10 @@ def warning_LED(amount):
         LED_PIN.off()
         sleep_ms(500)
 
-def boot_lights():
-    warning_LED(10)
-
-#boot_lights()
 def main():
     connect()
     bad_value = -10000
-    run = True
-    while run:
+    while check_status_pin():
         LED_PIN.on()
         dht11_sensor = dht.DHT11(Pin(27))
         temp = bad_value
@@ -97,7 +87,6 @@ def main():
             print("Failed to get signal")
             LED_PIN.off()
             
-        run = check_status_pin()
         sleep_ms(DELAY*1000)
         
 def check_status_pin():
@@ -105,9 +94,7 @@ def check_status_pin():
     print(status_pin.value())
     return status_pin.value() != 1
       
-run_program = check_status_pin()  
-while run_program:  
+while check_status_pin():  
     main()
-    run_program = check_status_pin()
 warning_LED(10)
 LED_PIN.off()
