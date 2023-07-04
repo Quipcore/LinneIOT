@@ -44,33 +44,56 @@ The following is the circuit diagram and a real world application of the circuit
 ![Curcit Diagram](https://github.com/Quipcore/Temperature-Humidity-Measurer/blob/main/pico%20circuit%20diagram.png?raw=true)
 ![Real world setup](https://github.com/Quipcore/Temperature-Humidity-Measurer/blob/main/real%20world%20wiring.jpg?raw=true)
 ## Platfrom
-The platform we are going to use for storing, displaying and graphing the data is called [Ubidots](https://ubidots.com/).
+The platform we are going to use for storing, displaying and graphing the data is called [Ubidots](https://ubidots.com/). The way we are going to communicate with ubidots is through the buildt-in pico network and urequest libraries. As we will se late in the code section we are going to use HTTP request sent to the ubidots API to communicate, this is also the reason why we use ubisoft, as we can just use the built-in libraries to send data to their platform 
 
 ## The code
+The program is defined according to this flowchart
+```mermaid
+flowchart TD;
+	subgraph Program
+	start --> is_status{is status pin on}
+	is_status -->|NO|Connect
+	is_status -->|YES| Exit
+		subgraph MAIN
+		    Connect--> LED_ON[Turn on LED]
+		    LED_ON --> DHT11_SETUP[Setup DHT11 pin]
+		    DHT11_SETUP --> DHT11_VAL[Get DHT11 sensor values]
+		    DHT11_VAL--> SEND[Send values to UBIDOTS]
+		    SEND --> STATUS[Check debug status pin]
+		    STATUS --> DELAY
+		    DELAY--> CONTINUE_WHILE{Is the status pin on}
+		    CONTINUE_WHILE-->|NO|LED_ON
+	    end
+	    CONTINUE_WHILE-->|YES| Exit
+    end
+```
+You have one main program that loops until it get interrupted by the status pin (#15 in the circuit diagram) reciving a signal. The status pin is there so programs like Vscode and Thonny can come in and edit the code on the Pico if their own tools can't get a communication over the USB.
+
+So how what does the program accually look like?[^1] Well we start off by defining a couple of global constants. Notice! Due to safety reasons some of the constats are left blank, this is for each user to fill out as needed.  
+[^1]: For the boot program in it's entierly see: [boot.py] (https://github.com/Quipcore/Temperature-Humidity-Measurer/blob/main/boot.py)
+
 ``` python
-from machine import Pin, reset, ADC
-#ubidots api
-API_KEY =""
-TOKEN = "" #Put here your TOKEN
+from machine import Pin
+TOKEN = "" #Put your TOKEN here
 DEVICE_LABEL = "picowboard" # Assign the device label desire to be send
-VARIABLE_LABEL = "sensor"  # Assign the variable label desire to be send
-TEMP_LABEL = "temp"
-HUMIDITY_LABEL = "humidity"
+TEMP_LABEL = "temp" # Assign the temperature label desire to be send
+HUMIDITY_LABEL = "humidity" # Assign the humidity label desire to be send
 WIFI_SSID = "" # Assign your the SSID of your network
 WIFI_PASS = "" # Assign your the password of your network
 DELAY = 5  # Delay in seconds
 LED_PIN = Pin("LED", Pin.OUT)
 ```
 
-
+This is main method and it follows the flowchart above. Connect to wifi, take temperature and humidity measurements, and then send it ubidots. 
 ```python
 import dht11 as dht
+from time import sleep_ms
+
 def main():
     connect()
     bad_value = -10000
-    run = True
-    while run:
-        LED_PIN.on()
+    while check_status_pin():
+        LED_PIN.on() #Signal succesfull connection and status
         dht11_sensor = dht.DHT11(Pin(27))
         temp = bad_value
         humidity = bad_value
@@ -86,11 +109,15 @@ def main():
             print("Failed to get signal")
             LED_PIN.off()
             
-        run = check_status_pin()
         sleep_ms(DELAY*1000)
 ```
+
+This connect method is more or less borrowed directly from the raspberry pi documentation
 ```python
 import network
+from time import sleep
+
+#Connect to WIFI
 def connect():
     wlan = network.WLAN(network.STA_IF)         # Put modem on Station mode
     if not wlan.isconnected():                  # Check if already connected
@@ -110,11 +137,20 @@ def connect():
     return ip
 ```
 
+The build_json and sendData get the values from the DHT11 sensor and then builds the packet that is then sent with a HTTP request to ubidots where the data is stored and visualized
 ```python
-# Sending data to Ubidots Restful Webserice
 import network
 import urequests as requests
 
+# Builds the json to send the request
+def build_json(temp_value, humidity_value):
+    try:
+        data = {TEMP_LABEL: {"value": temp_value}, HUMIDITY_LABEL: {"value": humidity_value}}
+        return data
+    except:
+        return None
+
+#Send data to ubidots API
 def sendData(device, temp_value, humidity_value):
     try:
         url = "https://industrial.api.ubidots.com/"
@@ -130,19 +166,9 @@ def sendData(device, temp_value, humidity_value):
     except:
         pass
 ```
-```py
-# Builds the json to send the request
-def build_json(temp_value, humidity_value):
-    try:
-        data = {TEMP_LABEL: {"value": temp_value}, HUMIDITY_LABEL: {"value": humidity_value}}
-        return data
-    except:
-        return None
-```
 
-#### Libs:
+**Required libraries**:
 [DHT11](https://github.com/iot-lnu/applied-iot/blob/master/1DV027/DHT11-pico-w/dht.py)
-[PicoZero](https://pypi.org/project/picozero/)
 
 
 ## Transmitting the data/Connectivity
