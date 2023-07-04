@@ -70,7 +70,7 @@ def main():
     connect()
     bad_value = -10000
     while check_status_pin():
-        LED_PIN.on()
+        LED_PIN.on() #Signal succesfull connection and status
         dht11_sensor = dht.DHT11(Pin(27))
         temp = bad_value
         humidity = bad_value
