@@ -1,3 +1,4 @@
+#Taken from: https://github.com/iot-lnu/applied-iot/blob/master/1DV027/DHT11-pico-w/dht.py
 import array
 
 import micropython
