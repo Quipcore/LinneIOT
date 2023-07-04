@@ -22,8 +22,8 @@ def build_json(temp_value, humidity_value):
         return data
     except:
         return None
-
-# Sending data to Ubidots Restful Webserice
+        
+#Send data to ubidots API
 def sendData(device, temp_value, humidity_value):
     try:
         url = "https://industrial.api.ubidots.com/"
