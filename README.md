@@ -6,8 +6,6 @@ The objective of this project is to measure temperature and humitdity from a sen
 **Time**: around one hour
 
 ## Objective  
-#### <font color="red"> **NEEDS REWRITE**  </font>
-
 I had been sleeping poorly due to the swedish summer heat. To combat this I created a small IOT project to track the temperature in my bedroom. The plan was to use this data and see when and why the bedroom got to its warmest point, was it due to computer devices emitting a lot of heat or the general temperature outside? Being a student meaning that I didn't have the biggest disposable icome to fix say my PCs heating issue I investigated to see if it was something else cheaper that needed a fix first. While project didn't include data from my PC it really should have so I wouldn't have to guess at the cause
 
 ## Material
@@ -193,6 +191,14 @@ Content-Length: 54<CR><LN><CR><LN>
 ``` 
 > Notice the disapperance of `User-Agent: {USER_AGENT} <CR><LN>`. This is because  this header is optional
 
-## Presenting the data
+This is then sent as a POST request to ubidots.
+In ubidots there is a dashboard that visualize the data from the device as specified by the authentication token. In the ubidots the are two labels "temp" and "humidity" connected to the pico device/token this is then shown as a graph in the dashboard
 
+## Presenting the data
+In the ubidots the are two labels "temp" and "humidity" connected to the pico device/token this is then shown as a graph in the dashboard. Below is the data collected between Jun 28-Jul 04
+![](https://github.com/Quipcore/Temperature-Humidity-Measurer/blob/main/ubidots_temprature_data_2023-06-28_2023-07-04.png?raw=true)
+
+![](https://github.com/Quipcore/Temperature-Humidity-Measurer/blob/main/ubidots_humidity_data_2023-06-28_2023-07-04.png?raw=true)
+
+The ubidots api can handle 5 requests/sec but mostly due the fact at the scale above you can't see 5 data points every second the pico is set to send once every 5 second, but if it fails to do so for some reason it won't really matter if it takes 10-15 seconds between requests going it's still going to have the right shape in the visualization. 
 ## Finalizing the design
