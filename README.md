@@ -1,38 +1,39 @@
 # Tutorial on how to build a temperature and humidity sensor
 Felix Lidö - fl223gf
 
-The objective of this project is to measure temprature and humitdity from a sensor. The data is then sent to ubidots for analaysis
+The objective of this project is to measure temperature and humitdity from a sensor. The data is then sent to ubidots for analaysis
 
 **Time**: around one hour
 
-## Objective
-The objective of this project is to measure temprature and humitdity from a sensor. The data is then sent to ubidots for analaysis
+## Objective  
+#### <font color="red"> **NEEDS REWRITE**  </font>
+
+I had been sleeping poorly due to the swedish summer heat. To combat this I created a small IOT project to track the temperature in my bedroom. The plan was to use this data and see when and why the bedroom got to its warmest point, was it due to computer devices emitting a lot of heat or the general temperature outside? Being a student meaning that I didn't have the biggest disposable icome to fix say my PCs heating issue I investigated to see if it was something else cheaper that needed a fix first. While project didn't include data from my PC it really should have so I wouldn't have to guess at the cause
 
 ## Material
 #####  Materials required for build:
-| Material | Price (sek) | Link |
-|:------ |:-----------: | :-------:|
-| Rasberry Pi Pico WH| 109 | [Electrokit](https://www.electrokit.com/produkt/raspberry-pi-pico-wh/)|
-| DHT11 Sensor| 49 | [Electrokit](https://www.electrokit.com/produkt/digital-temperatur-och-fuktsensor-dht11/) |
-| Jumper wire | 29|[Electrokit](https://www.electrokit.com/produkt/labbsladd-20-pin-15cm-hane-hane/)|
-|220 $\Omega$ Resistor|3|[Electrokit](https://www.electrokit.com/en/product/resistor-1w-5-220ohm-220r/)|
+| Material | Price (sek) | Link | Description|
+|:------ |:-----------: | :-------:|:-------|
+| Rasberry Pi Pico WH| 109 | [Electrokit](https://www.electrokit.com/produkt/raspberry-pi-pico-wh/)|The brains of this operation. This is where the code is executed from. The Pico Ws comes with WIFI and other wireless communcation capabilities
+| DHT11 Sensor| 49 | [Electrokit](https://www.electrokit.com/produkt/digital-temperatur-och-fuktsensor-dht11/) | Used to collect the temperature and humidity data
+| Jumper wire | 29|[Electrokit](https://www.electrokit.com/produkt/labbsladd-20-pin-15cm-hane-hane/)| Tranfer data and power/ground
+|220 $\Omega$ Resistor|3|[Electrokit](https://www.electrokit.com/en/product/resistor-1w-5-220ohm-220r/)| Stops the DHT11 from getting overheated
 
- - Raspberry Pi Pico WH
- - DHT11 Sensor
- - Jumper wire
- - Resistor
-
+Total cost: 190 sek
 ##### Extra material used for debugging: 
-| Material | Price (sek) | Link |
-|:------ |:-----------: | :-------:|
-|Push button PCB 0.8 mm black|5.50|[Electrokit](https://www.electrokit.com/en/product/push-button-pcb-0-8-mm-black/)|
-
-- Push button PCB 
+| Material | Price (sek) | Link |Description|
+|:------ |:-----------: | :-------:|:-------|
+|Push button PCB 0.8 mm black|5.50|[Electrokit](https://www.electrokit.com/en/product/push-button-pcb-0-8-mm-black/)| Used for exiting the main code loop so that applications like VScode can come in and talk to the Pico
 
 ## Computer setup
+This project has used and tested multiples editors and IDEs.
+
+
 
 VScode with the pymakr plugin and NodeJS 
+
 pyCharm with Micropython
+
 Thonny
 
 ## Putting everything together
